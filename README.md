@@ -32,20 +32,25 @@
 ```bash
 python -m venv venv
 ```
+2. Antes de activar el entorno (solo mientras está abierta la terminal actual) ejecutar:
 
-2. Activar el entorno virtual:
+```bash
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+```
+
+3. Activar el entorno virtual:
 
    ```bash
    .\venv\Scripts\activate
    ```
   
-3. Instalar las dependencias:
+4. Instalar las dependencias:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Ejecutar el servidor:
+5. Ejecutar el servidor:
 
 ```bash
 python app.py
@@ -53,7 +58,7 @@ python app.py
 
 **Nota**: Si encuentras errores relacionados con `werkzeug.urls` o `url_quote`, asegúrate de tener las versiones compatibles en requirements.txt (Flask==2.0.1 y werkzeug==2.0.3).
 
-5. Abrir en el navegador:
+6. Abrir en el navegador:
    - http://localhost:5000
 
 ## Cómo usar
@@ -69,7 +74,6 @@ python app.py
 
 - `{}` - Bloque vacío
 - `{$$$R}` - Insertar 3 monedas y comprar un refresco
-- `{$$$R$$R}` - Insertar 3 monedas, comprar un refresco, insertar 2 más y comprar otro
 - `{$$$R{$$$R}}` - Bloque anidado con un refresco en cada nivel
 - `{$<}` - Insertar una moneda y devolverla
 

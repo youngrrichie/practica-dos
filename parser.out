@@ -1,0 +1,188 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> programa
+Rule 1     programa -> LBRACE contenido RBRACE
+Rule 2     contenido -> accion contenido
+Rule 3     contenido -> empty
+Rule 4     accion -> DOLLAR
+Rule 5     accion -> REFRESCO
+Rule 6     accion -> DEVOLVER
+Rule 7     accion -> LBRACE contenido RBRACE
+Rule 8     empty -> <empty>
+
+Terminals, with rules where they appear
+
+DEVOLVER             : 6
+DOLLAR               : 4
+LBRACE               : 1 7
+RBRACE               : 1 7
+REFRESCO             : 5
+error                : 
+
+Nonterminals, with rules where they appear
+
+accion               : 2
+contenido            : 1 2 7
+empty                : 3
+programa             : 0
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . programa
+    (1) programa -> . LBRACE contenido RBRACE
+
+    LBRACE          shift and go to state 2
+
+    programa                       shift and go to state 1
+
+state 1
+
+    (0) S' -> programa .
+
+
+
+state 2
+
+    (1) programa -> LBRACE . contenido RBRACE
+    (2) contenido -> . accion contenido
+    (3) contenido -> . empty
+    (4) accion -> . DOLLAR
+    (5) accion -> . REFRESCO
+    (6) accion -> . DEVOLVER
+    (7) accion -> . LBRACE contenido RBRACE
+    (8) empty -> .
+
+    DOLLAR          shift and go to state 7
+    REFRESCO        shift and go to state 8
+    DEVOLVER        shift and go to state 9
+    LBRACE          shift and go to state 3
+    RBRACE          reduce using rule 8 (empty -> .)
+
+    contenido                      shift and go to state 4
+    accion                         shift and go to state 5
+    empty                          shift and go to state 6
+
+state 3
+
+    (7) accion -> LBRACE . contenido RBRACE
+    (2) contenido -> . accion contenido
+    (3) contenido -> . empty
+    (4) accion -> . DOLLAR
+    (5) accion -> . REFRESCO
+    (6) accion -> . DEVOLVER
+    (7) accion -> . LBRACE contenido RBRACE
+    (8) empty -> .
+
+    DOLLAR          shift and go to state 7
+    REFRESCO        shift and go to state 8
+    DEVOLVER        shift and go to state 9
+    LBRACE          shift and go to state 3
+    RBRACE          reduce using rule 8 (empty -> .)
+
+    contenido                      shift and go to state 10
+    accion                         shift and go to state 5
+    empty                          shift and go to state 6
+
+state 4
+
+    (1) programa -> LBRACE contenido . RBRACE
+
+    RBRACE          shift and go to state 11
+
+
+state 5
+
+    (2) contenido -> accion . contenido
+    (2) contenido -> . accion contenido
+    (3) contenido -> . empty
+    (4) accion -> . DOLLAR
+    (5) accion -> . REFRESCO
+    (6) accion -> . DEVOLVER
+    (7) accion -> . LBRACE contenido RBRACE
+    (8) empty -> .
+
+    DOLLAR          shift and go to state 7
+    REFRESCO        shift and go to state 8
+    DEVOLVER        shift and go to state 9
+    LBRACE          shift and go to state 3
+    RBRACE          reduce using rule 8 (empty -> .)
+
+    accion                         shift and go to state 5
+    contenido                      shift and go to state 12
+    empty                          shift and go to state 6
+
+state 6
+
+    (3) contenido -> empty .
+
+    RBRACE          reduce using rule 3 (contenido -> empty .)
+
+
+state 7
+
+    (4) accion -> DOLLAR .
+
+    DOLLAR          reduce using rule 4 (accion -> DOLLAR .)
+    REFRESCO        reduce using rule 4 (accion -> DOLLAR .)
+    DEVOLVER        reduce using rule 4 (accion -> DOLLAR .)
+    LBRACE          reduce using rule 4 (accion -> DOLLAR .)
+    RBRACE          reduce using rule 4 (accion -> DOLLAR .)
+
+
+state 8
+
+    (5) accion -> REFRESCO .
+
+    DOLLAR          reduce using rule 5 (accion -> REFRESCO .)
+    REFRESCO        reduce using rule 5 (accion -> REFRESCO .)
+    DEVOLVER        reduce using rule 5 (accion -> REFRESCO .)
+    LBRACE          reduce using rule 5 (accion -> REFRESCO .)
+    RBRACE          reduce using rule 5 (accion -> REFRESCO .)
+
+
+state 9
+
+    (6) accion -> DEVOLVER .
+
+    DOLLAR          reduce using rule 6 (accion -> DEVOLVER .)
+    REFRESCO        reduce using rule 6 (accion -> DEVOLVER .)
+    DEVOLVER        reduce using rule 6 (accion -> DEVOLVER .)
+    LBRACE          reduce using rule 6 (accion -> DEVOLVER .)
+    RBRACE          reduce using rule 6 (accion -> DEVOLVER .)
+
+
+state 10
+
+    (7) accion -> LBRACE contenido . RBRACE
+
+    RBRACE          shift and go to state 13
+
+
+state 11
+
+    (1) programa -> LBRACE contenido RBRACE .
+
+    $end            reduce using rule 1 (programa -> LBRACE contenido RBRACE .)
+
+
+state 12
+
+    (2) contenido -> accion contenido .
+
+    RBRACE          reduce using rule 2 (contenido -> accion contenido .)
+
+
+state 13
+
+    (7) accion -> LBRACE contenido RBRACE .
+
+    DOLLAR          reduce using rule 7 (accion -> LBRACE contenido RBRACE .)
+    REFRESCO        reduce using rule 7 (accion -> LBRACE contenido RBRACE .)
+    DEVOLVER        reduce using rule 7 (accion -> LBRACE contenido RBRACE .)
+    LBRACE          reduce using rule 7 (accion -> LBRACE contenido RBRACE .)
+    RBRACE          reduce using rule 7 (accion -> LBRACE contenido RBRACE .)
+

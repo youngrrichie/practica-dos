@@ -69,45 +69,21 @@ def p_contenido_con_accion(p):
     accion_valido, accion_errores, accion_saldo, accion_refrescos, accion_nivel, accion_arbol = p[1]
     
     # Extraer atributos del contenido
-    cont_valido, cont_errores, cont_saldo, cont_refrescos, cont_nivel, cont_arbol = p[2]
+    cont_valido, cont_errores, cont_saldo_resto, cont_refrescos_resto, cont_nivel, cont_arbol = p[2]
     
     # El nivel es el máximo entre ambos
     nivel_actual = max(accion_nivel, cont_nivel)
     
-    # Acumular saldo - esto simula que las acciones se ejecutan secuencialmente
-    saldo_acumulado = accion_saldo + cont_saldo
+    # CORRECCIÓN: Simplificar la lógica - no validar restricciones aquí
+    # Solo acumular los cambios de saldo y refrescos
+    saldo_final = accion_saldo + cont_saldo_resto
+    refrescos_total = accion_refrescos + cont_refrescos_resto
     
-    # Verificar si el saldo es suficiente para la operación actual
-    # Para compra de refresco (R), verificamos si hay al menos 3 monedas antes de la compra
-    saldo_valido = True
-    errores_final = accion_errores + cont_errores
+    # Combinar errores sin agregar validaciones adicionales
+    errores_final = accion_errores.copy() + cont_errores.copy()
     
-    # Si es una acción de comprar refresco (R), verificamos el saldo disponible
-    if accion_arbol['tipo'] == 'accion' and accion_arbol['texto'] == 'R':
-        # El saldo disponible es el actual de las acciones previas (cont_saldo)
-        if cont_saldo < 3:
-            saldo_valido = False
-            errores_final.append(f"Error: Saldo insuficiente ({cont_saldo} < 3) para comprar refresco en nivel {nivel_actual}")
-    
-    # Si es una acción de devolver (< devolver moneda), verificamos el saldo disponible
-    elif accion_arbol['tipo'] == 'accion' and accion_arbol['texto'] == '<':
-        # El saldo disponible es el actual de las acciones previas (cont_saldo)
-        if cont_saldo < 1:
-            saldo_valido = False
-            errores_final.append(f"Error: No hay monedas para devolver en nivel {nivel_actual}")
-    
-    # Acumular refrescos
-    refrescos_acumulados = accion_refrescos + cont_refrescos
-    
-    # Verificar si no excede el máximo de refrescos
-    refrescos_valido = refrescos_acumulados <= 3
-    
-    # La validez depende de ambos componentes y las restricciones adicionales
-    valido_final = accion_valido and cont_valido and saldo_valido and refrescos_valido
-    
-    # Agregar error si hay exceso de refrescos
-    if not refrescos_valido:
-        errores_final.append(f"Error: Exceso de refrescos ({refrescos_acumulados} > 3) en nivel {nivel_actual}")
+    # La validez depende de todos los componentes
+    valido_final = accion_valido and cont_valido
     
     # Construir árbol de derivación
     arbol = {
@@ -116,14 +92,14 @@ def p_contenido_con_accion(p):
         'hijos': [accion_arbol, cont_arbol],
         'atributos': {
             'valido': valido_final,
-            'saldo': saldo_acumulado,
-            'refrescos': refrescos_acumulados,
+            'saldo': saldo_final,
+            'refrescos': refrescos_total,
             'nivel': nivel_actual,
             'errores': errores_final
         }
     }
     
-    p[0] = (valido_final, errores_final, saldo_acumulado, refrescos_acumulados, nivel_actual, arbol)
+    p[0] = (valido_final, errores_final, saldo_final, refrescos_total, nivel_actual, arbol)
 
 def p_contenido_vacio(p):
     'contenido : empty'
@@ -158,20 +134,19 @@ def p_accion_dollar(p):
             'errores': []
         }
     }
-    p[0] = (True, [], 1, 0, 0, arbol)  # (valido, errores, saldo, refrescos, nivel, arbol)
+    p[0] = (True, [], 1, 0, 0, arbol)
 
 def p_accion_refresco(p):
     'accion : REFRESCO'
     # Un refresco cuesta 3 unidades de saldo
-    # Por defecto asumimos que es válido (se verificará en el contenedor)
     arbol = {
         'tipo': 'accion',
         'texto': 'R',
         'hijos': [],
         'atributos': {
-            'valido': True,  # Inicialmente asumimos válido
-            'saldo': -3,     # Cuesta 3 monedas
-            'refrescos': 1,  # Es 1 refresco
+            'valido': True,
+            'saldo': -3,
+            'refrescos': 1,
             'nivel': 0,
             'errores': []
         }
@@ -186,8 +161,8 @@ def p_accion_devolver(p):
         'texto': '<',
         'hijos': [],
         'atributos': {
-            'valido': True,  # Inicialmente asumimos válido
-            'saldo': -1,     # Devuelve 1 moneda
+            'valido': True,
+            'saldo': -1,
             'refrescos': 0,
             'nivel': 0,
             'errores': []
@@ -203,8 +178,8 @@ def p_accion_bloque(p):
     # Incrementar el nivel para el bloque anidado
     nivel_actual = contenido_nivel + 1
     
-    # Verificar si no excede el máximo de niveles
-    nivel_valido = nivel_actual <= 3
+    # Verificar si no excede el máximo de niveles (3)
+    nivel_valido = nivel_actual < 3
     
     # La validez depende del contenido y del nivel
     valido_final = contenido_valido and nivel_valido
@@ -223,17 +198,16 @@ def p_accion_bloque(p):
         'hijos': [contenido_arbol],
         'atributos': {
             'valido': valido_final,
-            'saldo': 0,  # El saldo no se hereda del bloque interno
-            'refrescos': 0, # Los refrescos tampoco se heredan
+            'saldo': 0,  # Los bloques anidados no propagan saldo hacia afuera
+            'refrescos': 0, # Los bloques anidados no propagan refrescos hacia afuera
             'nivel': nivel_actual,
             'errores': errores_final,
-            # Guardamos información del bloque interno para visualización
             'saldo_interno': contenido_saldo,
             'refrescos_interno': contenido_refrescos
         }
     }
     
-    # El saldo y refrescos no se heredan fuera del bloque
+    # Los bloques no propagan saldo ni refrescos
     p[0] = (valido_final, errores_final, 0, 0, nivel_actual, arbol)
 
 def p_empty(p):
@@ -254,61 +228,150 @@ def analizar(texto):
     resultado = parser.parse(texto, lexer=lexer)
     return resultado
 
+def validar_semanticamente(cadena):
+    """Validación semántica mejorada que simula la ejecución de la máquina"""
+    try:
+        # Eliminar espacios
+        cadena = cadena.strip()
+        
+        # Verificar estructura básica
+        if not cadena.startswith('{') or not cadena.endswith('}'):
+            return False, ["Error: La cadena debe estar entre llaves"], 0, 0, 0
+        
+        # Simular ejecución secuencial
+        saldo = 0
+        refrescos = 0
+        nivel = 0
+        errores = []
+        pila_contextos = []  # Para manejar bloques anidados
+        
+        # Procesar cada carácter
+        i = 1  # Empezar después de la llave inicial
+        while i < len(cadena) - 1:  # Terminar antes de la llave final
+            char = cadena[i]
+            
+            if char == '$':
+                # Insertar moneda
+                saldo += 1
+                print(f"  Posición {i}: Moneda insertada: saldo = {saldo}")
+                
+            elif char == 'R':
+                # Comprar refresco
+                print(f"  Posición {i}: Intentando comprar refresco: saldo = {saldo}")
+                if saldo >= 3:
+                    saldo -= 3
+                    refrescos += 1
+                    print(f"  Refresco comprado: saldo = {saldo}, refrescos = {refrescos}")
+                    if refrescos > 3:
+                        errores.append(f"Error: Exceso de refrescos ({refrescos} > 3) en posición {i}")
+                else:
+                    errores.append(f"Error: Saldo insuficiente ({saldo} < 3) para comprar refresco en posición {i}")
+                    
+            elif char == '<':
+                # Devolver moneda
+                print(f"  Posición {i}: Intentando devolver moneda: saldo = {saldo}")
+                if saldo >= 1:
+                    saldo -= 1
+                    print(f"  Moneda devuelta: saldo = {saldo}")
+                else:
+                    errores.append(f"Error: No hay monedas para devolver en posición {i}")
+                    
+            elif char == '{':
+                # Inicio de bloque anidado
+                print(f"  Posición {i}: Inicio de bloque: nivel {nivel} -> {nivel + 1}")
+                pila_contextos.append({
+                    'saldo_anterior': saldo,
+                    'refrescos_anterior': refrescos,
+                    'nivel_anterior': nivel
+                })
+                nivel += 1
+                if nivel > 3:
+                    errores.append(f"Error: Nivel de anidamiento excesivo ({nivel} > 3) en posición {i}")
+                # El saldo se hereda en el bloque interno
+                
+            elif char == '}':
+                # Final de bloque anidado
+                if pila_contextos:
+                    contexto_anterior = pila_contextos.pop()
+                    print(f"  Posición {i}: Fin de bloque: nivel {nivel} -> {nivel - 1}")
+                    print(f"    Saldo interno final: {saldo}, refrescos internos: {refrescos}")
+                    
+                    # Al salir del bloque, restaurar el contexto anterior
+                    # pero mantener el saldo actualizado (el saldo sí se propaga)
+                    refrescos = contexto_anterior['refrescos_anterior']  # Los refrescos no se propagan
+                    nivel = contexto_anterior['nivel_anterior']
+                    
+                    print(f"    Restaurando contexto: saldo = {saldo}, refrescos = {refrescos}")
+                else:
+                    print(f"  Posición {i}: Cierre de bloque principal")
+                    
+            i += 1
+        
+        # Verificar que todos los bloques se cerraron correctamente
+        if pila_contextos:
+            errores.append("Error: Bloques sin cerrar")
+        
+        print(f"Resultado final: saldo = {saldo}, refrescos = {refrescos}, errores = {errores}")
+        valido = len(errores) == 0
+        return valido, errores, saldo, refrescos, max(0, nivel)
+        
+    except Exception as e:
+        return False, [f"Error en validación semántica: {str(e)}"], 0, 0, 0
+
 def validar_cadena(cadena):
     try:
+        print(f"\n=== Analizando cadena: '{cadena}' ===")
+        
         # Verificar que la cadena no esté vacía
         if not cadena:
             return False, "Cadena vacía", None
             
+        # Primero hacer análisis sintáctico
         resultado_analisis = analizar(cadena)
         
         # Verificar si el análisis retornó None (error sintáctico)
         if resultado_analisis is None:
             return False, "Error de sintaxis", None
-            
-        valido, errores, saldo, refrescos, nivel, arbol = resultado_analisis
         
-        # Los ejemplos de validación deben respetar la lógica semántica de la máquina
-        # Casos especiales conocidos que deben ser válidos
-        casos_especiales = ["{$$$R}", "{$$$R$$R}", "{$<}", "{$$$$$$$$$RRR}"]
+        # Extraer resultados del análisis sintáctico
+        valido_sintactico, errores_sintacticos, saldo_sintactico, refrescos_sintacticos, nivel_sintactico, arbol = resultado_analisis
         
-        if cadena in casos_especiales and not valido:
-            print(f"Corrigiendo caso especial conocido: {cadena}")
-            valido = True
-            errores = []
+        print(f"Análisis sintáctico: válido={valido_sintactico}, errores={errores_sintacticos}")
         
-        # Asegúrate de que el bloque vacío sigue siendo válido
-        if cadena == "{}":
-            valido = True
-            errores = []
-            
-        # Formato del mensaje final
-        if valido and not errores:
-            mensaje = "Cadena válida semánticamente"
+        # Hacer validación semántica adicional
+        valido_semantico, errores_semanticos, saldo_semantico, refrescos_semanticos, nivel_semantico = validar_semanticamente(cadena)
+        
+        print(f"Análisis semántico: válido={valido_semantico}, errores={errores_semanticos}")
+        
+        # Combinar resultados
+        errores_finales = errores_sintacticos + errores_semanticos
+        valido_final = valido_sintactico and valido_semantico and len(errores_finales) == 0
+        
+        # Usar los valores semánticos que son más precisos
+        saldo_final = saldo_semantico
+        refrescos_final = refrescos_semanticos
+        nivel_final = max(nivel_sintactico, nivel_semantico)
+        
+        # Mensaje de resultado
+        if valido_final:
+            mensaje = "Cadena válida sintáctica y semánticamente"
         else:
-            mensaje = f"Cadena inválida semánticamente: {', '.join(errores)}"
+            mensaje = f"Cadena inválida: {', '.join(errores_finales)}"
         
-        # Verificar si hay errores pero el árbol se considera válido
-        if valido and errores:
-            print(f"Advertencia: La cadena '{cadena}' se marcó como válida pero tiene errores: {errores}")
-            # Limpia los errores si el árbol es considerado válido
-            errores = []
-            
-        # Resultado estructurado para facilitar la visualización
+        # Resultado estructurado
         resultado = {
-            'valido': valido and not errores,  # Sólo es válido si no hay errores
+            'valido': valido_final,
             'mensaje': mensaje,
-            'saldo_final': saldo,
-            'refrescos': refrescos,
-            'nivel': nivel,
-            'errores': errores,
+            'saldo_final': saldo_final,
+            'refrescos': refrescos_final,
+            'nivel': nivel_final,
+            'errores': errores_finales,
             'arbol': arbol
         }
         
-        # Debug
-        print(f"Análisis de '{cadena}': valido={valido}, errores={errores}, saldo={saldo}")
+        print(f"Resultado final: valido={valido_final}, saldo={saldo_final}, refrescos={refrescos_final}")
         
-        return valido and not errores, mensaje, resultado
+        return valido_final, mensaje, resultado
     
     except Exception as e:
         print(f"Error al analizar '{cadena}': {str(e)}")
@@ -325,10 +388,13 @@ def main():
     cadenas_validas = [
         "{}",                # Bloque vacío
         "{$$$R}",            # Saldo suficiente para un refresco
-        "{$$$R$$R}",         # Saldo suficiente para dos refrescos
-        "{$$$R{$$$R}}",      # Anidamiento válido con refrescos en ambos niveles
+        "{$$$$$$RR}",        # Saldo suficiente para dos refrescos
+        "{$$$$$$RR{$$$R}}",  # Anidamiento válido con refrescos en ambos niveles
+        "{$$$$$$RR{$$$R}<}", # Ejemplo problemático - debería ser válido
         "{$<}",              # Añadir una moneda y devolverla
         "{$$$$$$$$$RRR}",    # Máximo de refrescos permitidos
+        "{$$$R{$$${R}}}",    # Anidamiento válido más complejo
+        "{$$$$$$RR{$$$R}<}", # Prueba específica del error reportado
     ]
     
     # Ejemplos de cadenas inválidas semánticamente
@@ -339,7 +405,8 @@ def main():
         "{$$$R{$$$R{$$$R{$$$R}}}}",  # Exceso de anidamiento
         "{$$$RRRR}",         # Exceso de refrescos en un bloque
         "{<}",               # Devolución sin saldo
-        "{${$$R}<}",         # Bloque anidado con saldo insuficiente
+        "{$$<$R}",           # Saldo insuficiente después de devolver
+        "{$$$R{$$$R}<}",     # Devolver cuando no hay saldo suficiente
     ]
     
     print("=== Pruebas con cadenas válidas ===")
@@ -347,12 +414,13 @@ def main():
         valido, mensaje, resultado = validar_cadena(cadena)
         print(f"Cadena {i+1}: '{cadena}'")
         print(f"Resultado: {mensaje}")
-        print(f"Saldo final: {resultado['saldo_final']}")
-        print(f"Refrescos: {resultado['refrescos']}")
+        if resultado:
+            print(f"Saldo final: {resultado['saldo_final']}")
+            print(f"Refrescos: {resultado['refrescos']}")
         print()
         
         # Guardar el árbol de la primera cadena válida para ejemplo
-        if i == 0:
+        if i == 0 and resultado:
             guardar_arbol_json(resultado['arbol'], "arbol_valido.json")
     
     print("=== Pruebas con cadenas inválidas ===")
@@ -363,7 +431,7 @@ def main():
         print()
         
         # Guardar el árbol de la primera cadena inválida para ejemplo
-        if i == 0:
+        if i == 0 and resultado:
             guardar_arbol_json(resultado['arbol'], "arbol_invalido.json")
 
 if __name__ == "__main__":
