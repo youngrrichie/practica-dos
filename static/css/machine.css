@@ -1,0 +1,170 @@
+/* Agregar estilos específicos para la máquina expendedora */
+
+/* Display de la máquina */
+#machine-container {
+    border: 2px solid #3498db;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+}
+
+#machine-display {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+}
+
+#saldo-display, #refrescos-display, #nivel-display {
+    padding: 5px 10px;
+    background-color: #34495e;
+    border-radius: 4px;
+}
+
+#saldo-value, #refrescos-value, #nivel-value {
+    color: #2ecc71;
+}
+
+/* Errores */
+#error-container {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #fff3f3;
+    border-left: 4px solid #e74c3c;
+    border-radius: 0 4px 4px 0;
+}
+
+.errores-list {
+    list-style-type: none;
+}
+
+.error-item {
+    margin-bottom: 5px;
+    color: #c0392b;
+    font-size: 0.9em;
+}
+
+/* Instrucciones */
+.instrucciones {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border-left: 4px solid #3498db;
+}
+
+.instrucciones h3, .instrucciones h4 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.instrucciones ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.instrucciones li {
+    margin-bottom: 5px;
+}
+
+.instrucciones strong {
+    background-color: #34495e;
+    color: white;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+/* Visualización del árbol */
+#tree-container {
+    height: 500px;
+    overflow: auto;
+    border: 1px solid #ddd;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #fcfcfc;
+}
+
+/* Nodos del árbol */
+.node circle {
+    stroke-width: 2px;
+    stroke: #333;
+    cursor: pointer;
+}
+
+.node text {
+    font-size: 12px;
+    fill: #333;
+    font-weight: 500;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.node.valid circle {
+    stroke: #2ecc71;
+}
+
+.node.invalid circle {
+    stroke: #e74c3c;
+}
+
+.link {
+    fill: none;
+    stroke: #aaa;
+    stroke-width: 1.5px;
+}
+
+.valid-link {
+    stroke: #2ecc71;
+    stroke-width: 1.5px;
+}
+
+.invalid-link {
+    stroke: #e74c3c;
+    stroke-width: 1.5px;
+    stroke-dasharray: 4;
+}
+
+/* Tooltip para información de nodos */
+.tooltip {
+    pointer-events: none;
+}
+
+.tooltip rect {
+    opacity: 0.95;
+}
+
+.tooltip text {
+    fill: #333;
+}
+
+/* Destacar operaciones específicas */
+.operacion_moneda circle {
+    fill: #f1c40f;  /* color para moneda */
+}
+
+.operacion_refresco circle {
+    fill: #e67e22;  /* color para refresco */
+}
+
+.operacion_cambio circle {
+    fill: #16a085;  /* color para cambio */
+}
+
+/* Mensaje de error cuando no hay árbol */
+.tree-error {
+    padding: 20px;
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    margin: 20px 0;
+}

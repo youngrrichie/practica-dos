@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Máquina Expendedora - Analizador Semántico</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/machine.css') }}">
+    <!-- D3.js para visualizaciones -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Máquina Expendedora con Bloques Anidados</h1>
+            <p>Analizador semántico para simulación de una máquina expendedora</p>
+        </header>
+        
+        <main>
+            <section class="input-section">
+                <div class="input-container">
+                    <h2>Cadena de Entrada</h2>
+                    <textarea id="input-code" placeholder="Ejemplo: {$$$R}" autofocus></textarea>
+                    <div class="buttons">
+                        <button id="analizar-btn">Analizar</button>
+                        <button id="limpiar-btn">Limpiar</button>
+                    </div>
+                </div>
+                
+                <div class="ejemplos">
+                    <h3>Ejemplos</h3>
+                    <ul>
+                        <li><a href="#" class="ejemplo-link">{}</a></li>
+                        <li><a href="#" class="ejemplo-link">{$$$R}</a></li>
+                        <li><a href="#" class="ejemplo-link">{$$$R$$R}</a></li>
+                        <li><a href="#" class="ejemplo-link">{$$$R{$$$R}}</a></li>
+                        <li><a href="#" class="ejemplo-link">{$<}</a></li>
+                    </ul>
+                    <h4>Ejemplos inválidos</h4>
+                    <ul>
+                        <li><a href="#" class="ejemplo-link">{R}</a></li>
+                        <li><a href="#" class="ejemplo-link">{$R}</a></li>
+                        <li><a href="#" class="ejemplo-link">{$$$RRRR}</a></li>
+                        <li><a href="#" class="ejemplo-link">{$$$R{$$$R{$$$R{$$$R}}}}</a></li>
+                    </ul>
+                </div>
+                
+                <div class="instrucciones">
+                    <h3>Instrucciones</h3>
+                    <ul>
+                        <li><strong>$</strong>: Insertar moneda (incrementa el saldo)</li>
+                        <li><strong>R</strong>: Comprar refresco (cuesta 3 monedas)</li>
+                        <li><strong>&lt;</strong>: Devolver una moneda</li>
+                        <li><strong>{ }</strong>: Bloques anidados (máximo 3 niveles)</li>
+                    </ul>
+                    <h4>Reglas Semánticas</h4>
+                    <ul>
+                        <li>Cada bloque tiene su propio saldo independiente</li>
+                        <li>Un refresco (R) cuesta 3 monedas</li>
+                        <li>Máximo 3 refrescos por bloque</li>
+                        <li>Máximo 3 niveles de anidamiento</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section class="results-section">
+                <div class="result-status">
+                    <h2>Resultado</h2>
+                    <div id="status-message" class="message">
+                        Ingrese una expresión para analizar
+                    </div>
+                </div>
+                
+                <div class="visualization">
+                    <h3>Simulación de Máquina</h3>
+                    <div id="machine-container">
+                        <div id="machine-display">
+                            <div id="saldo-display">Saldo: <span id="saldo-value">0</span></div>
+                            <div id="refrescos-display">Refrescos: <span id="refrescos-value">0</span></div>
+                            <div id="nivel-display">Nivel: <span id="nivel-value">0</span></div>
+                        </div>
+                        <div id="tree-container"></div>
+                    </div>
+                </div>
+                
+                <div class="statistics">
+                    <h3>Estadísticas</h3>
+                    <div id="stats-container">
+                        <div class="stat-item">
+                            <span class="stat-label">Saldo final:</span>
+                            <span class="stat-value" id="saldo-final">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Refrescos comprados:</span>
+                            <span class="stat-value" id="refrescos-total">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Estado:</span>
+                            <span class="stat-value" id="estado-validez">Pendiente</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Nivel máximo:</span>
+                            <span class="stat-value" id="max-nivel">0</span>
+                        </div>
+                    </div>
+                    <div id="error-container"></div>
+                    <div id="level-stats"></div>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Simulador de Máquina Expendedora con Análisis Semántico - PLY (Python Lex-Yacc)</p>
+        </footer>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
