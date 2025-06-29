@@ -53,7 +53,7 @@ python app.py
 
 **Nota**: Si encuentras errores relacionados con `werkzeug.urls` o `url_quote`, asegúrate de tener las versiones compatibles en requirements.txt (Flask==2.0.1 y werkzeug==2.0.3).
 
-3. Abrir en el navegador:
+5. Abrir en el navegador:
    - http://localhost:5000
 
 ## Cómo usar
